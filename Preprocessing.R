@@ -58,14 +58,15 @@ pat_data <- CellCycleScoring(pat_data, s.features = sgenes, g2m.features = g2mge
 
 
 ###### ----------------- QC plots ----------------- ######
-dir.create("QC") 
+dir.create(paste(proj_dir,project,"QC",sep="/")) 
 
-setwd(paste(getwd(),"QC/",sep="/"))
+setwd(paste(proj_dir,project,"QC",sep="/"))
 # nFeature = number of genes per barcode
 # nCount = number of reads per barcode = count depth
-png(paste(dato,project,"QC_measures1.png",sep="_"),width = 1200, height = 1000, res = 150)
+
+#png(paste(dato,project,"QC_measures1.png",sep="_"),width = 1200, height = 1000, res = 150)
 VlnPlot(pat_data, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), pt.size = 0.1)
-dev.off()
+#dev.off()
 
 pat_data_QC <- as.data.frame(pat_data@meta.data)
 pat_data_QC <- pat_data_QC[order(pat_data_QC$nCount_RNA),]
@@ -146,7 +147,6 @@ writeLines(c(paste("Pre subsetting there were",Pre_ncells,"cells."),
              paste("MT threshold was set to: <",MTthres,"%")), 
            ThresFile)
 close(ThresFile)
-
 
 ### Normalize data
 pat_data <- NormalizeData(pat_data)
