@@ -104,15 +104,46 @@ ggplot(pat_data_QC, aes(x=nCount_RNA, y=nFeature_RNA, colour=percent.mt))+geom_p
   geom_vline(xintercept = c(2500,25000), colour = "red")+geom_hline(yintercept = c(1300,5000),colour="red")
 dev.off()
 
+# crazy high MT? plot this one too
+png(paste(dato,project,"QC_CountDepth_GeneCount_1.png",sep = "_"),height = 800, width = 1000, res =150)
+ggplot(pat_data_QC, aes(x=percent.mt, y=nFeature_RNA, colour=percent.mt))+geom_point()+
+     scale_colour_viridis()+ylab("Number of genes")+ggtitle(paste(project,sep=""))+
+  geom_hline(yintercept = c(1300,5000),colour="red")+
+  geom_vline(xintercept = c(20),colour="red")
+dev.off()
+
 png(paste(dato,project,"QC_CountDepth_GeneCount_2.png",sep = "_"),height = 800, width = 1000, res =150)
 ggplot(pat_data_QC[pat_data_QC$nCount_RNA<6000,], aes(x=nCount_RNA, y=nFeature_RNA, colour=percent.mt))+geom_point(size=0.2)+
   scale_colour_viridis()+xlab("Count Depth")+ylab("Number of genes")+ggtitle(paste(project,sep=""))+
   geom_hline(yintercept = 600, colour = "red")
 dev.off()
 
-#Set cut off slightly lower than the lines (can be adjusted later)
+#Set cut offs and subset slightly lower than the lines (can be adjusted later)
+MTthres <- 20
+CountLow <- NA #include in subsetting if necessary
+CountHigh <- NA #include in subsetting if necessary
+FeatLow <- 1300
+FeatHigh <- 5000
+
+# save some numbers on orig. sample
+Pre_ncells <- length(colnames(pat_data))
 ### Set thresholds and subset data
-pat_data <- subset(pat_data, subset = nFeature_RNA > 1000 & nFeature_RNA < 4500 & percent.mt < 10 )#& nCount_RNA < 25000)
+pat_data <- subset(pat_data, subset = nFeature_RNA > FeatLow & nFeature_RNA < FeatHigh
+                   & percent.mt < MTthres)
+Post_ncells <- length(colnames(pat_data))
+rem_nperc <- round((Pre_ncells-Post_ncells)/Pre_ncells*100)
+
+ThresFile <- file(paste(dato,"SubsetThresholds",project,".txt",sep="_"))
+writeLines(c(paste("Pre subsetting there were",Pre_ncells,"cells."),
+             paste("Removing ~",rem_nperc,"% of cells during single cell QC."),
+             paste("Post subsetting there are",Post_ncells,"cells"),
+             "Thresholds were set to:",
+             paste("Gene/feature level:",FeatLow,"to",FeatHigh),
+             paste("Count/read level:",CountLow,"to",CountHigh),
+             paste("MT threshold was set to: <",MTthres,"%")), 
+           ThresFile)
+close(ThresFile)
+
 
 ### Normalize data
 pat_data <- NormalizeData(pat_data)
