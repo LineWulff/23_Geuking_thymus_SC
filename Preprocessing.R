@@ -23,12 +23,12 @@ dato <- str_sub(str_replace_all(Sys.Date(),"-","_"), 3, -1)
 # colour string for imputation and overlays
 mycols_b <- c("#bdbdbd","#d9d9d9","#FDDBC7","#F4A582","#D6604D","#B2182B","#67001F")
 # project
-project <- "s6"
-proj_dir <- getwd()
+project <- "s7"
+proj_dir <- "/Users/linewulff/Documents/work/projects/23_Geuking_thymus_SC"
 data_dir <- "/Volumes/Promise\ RAID/Markus/Kirsty_scRNA_May2023"
 
-if (!dir.exists(project)){
-  dir.create(project)
+if (!dir.exists(paste(proj_dir,project,sep="/"))){
+  dir.create(paste(proj_dir,project,sep="/"))
 }else{
   print("dir exists")
 }
@@ -55,7 +55,7 @@ pat_data <- CellCycleScoring(pat_data, s.features = sgenes, g2m.features = g2mge
 
 
 ###### ----------------- QC plots ----------------- ######
-dir.create("QC")
+dir.create("QC") 
 
 setwd(paste(getwd(),"QC/",sep="/"))
 # nFeature = number of genes per barcode
@@ -84,12 +84,12 @@ dev.off()
 ## Number of genes
 png(paste(dato,project,"QC_NumberGeneshHisto_1.png",sep = "_"),height = 800, width = 1000, res =150)
 ggplot(pat_data_QC, aes(x=nFeature_RNA))+geom_histogram(fill="grey",bins = 100)+
-  xlab("Number of genes")+ggtitle(paste(project,"_ILF",sep=""))+geom_vline(xintercept = c(1300,5000), colour = "red")
+  xlab("Number of genes")+ggtitle(paste(project,"_ILF",sep=""))+geom_vline(xintercept = c(1200,5500), colour = "red")
 dev.off()
 
 png(paste(dato,project,"QC_NumberGeneshHisto_2.png",sep = "_"),height = 800, width = 1000, res =150)
 ggplot(pat_data_QC[pat_data_QC$nFeature_RNA<2000,], aes(x=nFeature_RNA))+geom_histogram(fill="grey",bins = 100)+
-  xlab("Number of genes")+ggtitle(paste(project,"_ILF",sep=""))+geom_vline(xintercept = 1300, colour = "red")
+  xlab("Number of genes")+ggtitle(paste(project,"_ILF",sep=""))+geom_vline(xintercept = 1200, colour = "red")
 dev.off()
 
 png(paste(dato,project,"QC_CountDepthRanked.png",sep = "_"),height = 800, width = 1000, res =150)
@@ -101,14 +101,14 @@ dev.off()
 png(paste(dato,project,"QC_CountDepth_GeneCount_1.png",sep = "_"),height = 800, width = 1000, res =150)
 ggplot(pat_data_QC, aes(x=nCount_RNA, y=nFeature_RNA, colour=percent.mt))+geom_point()+
   scale_colour_viridis()+xlab("Count Depth")+ylab("Number of genes")+ggtitle(paste(project,sep=""))+
-  geom_vline(xintercept = c(2500,25000), colour = "red")+geom_hline(yintercept = c(1300,5000),colour="red")
+  geom_vline(xintercept = c(2500,25000), colour = "red")+geom_hline(yintercept = c(1200,5500),colour="red")
 dev.off()
 
 # crazy high MT? plot this one too
 png(paste(dato,project,"QC_CountDepth_GeneCount_1.png",sep = "_"),height = 800, width = 1000, res =150)
 ggplot(pat_data_QC, aes(x=percent.mt, y=nFeature_RNA, colour=percent.mt))+geom_point()+
      scale_colour_viridis()+ylab("Number of genes")+ggtitle(paste(project,sep=""))+
-  geom_hline(yintercept = c(1300,5000),colour="red")+
+  geom_hline(yintercept = c(1200,5500),colour="red")+
   geom_vline(xintercept = c(20),colour="red")
 dev.off()
 
@@ -122,8 +122,8 @@ dev.off()
 MTthres <- 20
 CountLow <- NA #include in subsetting if necessary
 CountHigh <- NA #include in subsetting if necessary
-FeatLow <- 1300
-FeatHigh <- 5000
+FeatLow <- 1200
+FeatHigh <- 5500
 
 # save some numbers on orig. sample
 Pre_ncells <- length(colnames(pat_data))
@@ -154,7 +154,7 @@ top10 <- head(VariableFeatures(pat_data), 10)
 
 pat_data <- RenameCells(pat_data, add.cell.id = project)
 
-setwd(paste("/Volumes/Mucosal-immunology/WA group/Helmsley_Data/22_07_01/",project,sep="/"))
+setwd(paste(proj_dir,project,sep="/"))
 saveRDS(object=pat_data, file=paste(project,".rds",sep=""))
 
 plot1 <- VariableFeaturePlot(pat_data)
