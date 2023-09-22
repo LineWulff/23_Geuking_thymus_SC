@@ -42,6 +42,9 @@ pat_data <- Read10X(data.dir = paste(data_dir,project,"filtered_feature_bc_matri
 pat_data <- CreateSeuratObject(counts = pat_data, project = project, min.cells = 3, min.features = 100)
 
 ###### ----------------- Quality Control part 1 ----------------- ######
+# MT genes for mice using Broad institutes Mito carta data base as ref.
+# see https://www.broadinstitute.org/mitocarta/mitocarta30-inventory-mammalian-mitochondrial-proteins-and-pathways
+# for citations etc.
 MTref <- read.csv("/Volumes/Promise\ RAID/Line/reference_data/Mouse.MitoCarta3.0.csv", header = T)$Symbol
 MTref <- rownames(pat_data@assays$RNA@counts)[rownames(pat_data@assays$RNA@counts) %in% MTref]
 pat_data[["percent.mt"]] <- PercentageFeatureSet(pat_data, features = MTref)
