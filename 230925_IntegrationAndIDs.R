@@ -60,7 +60,7 @@ thymus <- FindClusters(thymus, resolution = res)
 DimPlot(thymus, group.by = "orig.ident")
 DimPlot(thymus, group.by = "Phase")
 # Quite a bit of effect of cell cycle - worse without the regression
-DimPlot(thymus, group.by = "integrated_snn_res.0.1")
+DimPlot(thymus, group.by = "integrated_snn_res.0.1", label = T, label.size = 6)+NoLegend()
 DimPlot(thymus, group.by = "integrated_snn_res.1")
 P1 <- FeaturePlot(thymus, features = c("percent.mt"))+scale_color_viridis_c(); P2 <- FeaturePlot(thymus, features = c("nFeature_RNA"))+scale_color_viridis_c()
 P1+P2
@@ -71,6 +71,7 @@ FeaturePlot(thymus, features = "Aire", order=T)+scale_color_gradientn(colours=my
 # Myeloid cells or B cells?
 FeaturePlot(thymus, features = "Itgax", order=T)+scale_color_gradientn(colours=mycols_b)
 FeaturePlot(thymus, features = "Cd79a", order=T)+scale_color_gradientn(colours=mycols_b)
+VlnPlot(thymus, features = c("Cd79a","Itgax"), pt.size = 0)
 
 # Split cl. 6 into res.0.2 and rename cells (2 clusters, 6a and 6b)
 # check cluster 6 only splits to two clusters
@@ -80,7 +81,7 @@ thymus@meta.data$res.0.1 <- as.character(thymus@meta.data$integrated_snn_res.0.1
 thymus@meta.data[thymus@meta.data$integrated_snn_res.0.2==9,]$res.0.1 <- "6a"
 thymus@meta.data[thymus@meta.data$integrated_snn_res.0.2==10,]$res.0.1 <- "6b"
 thymus@meta.data$res.0.1 <- factor(thymus@meta.data$res.0.1, levels = c("0","1","2","3","4","5","6a","6b","7","8"))
-DimPlot(thymus, group.by = "res.0.1")
+DimPlot(thymus, group.by = "res.0.1", label = T, label.size = 6)+NoLegend()
 
 #### Identifying DEGs ####
 Idents(thymus) <- 'res.0.1'
@@ -115,15 +116,106 @@ for (clus in unique(ST1$cluster)){
   print(plot1)
 }
 
-# Averaging thymic sc object and modulescores to plot neatly in heatmap
-Av_thym <- AverageExpression(thymus, return.seurat = T, group.by = c("res.0.1","orig.ident"))
-for (clus in unique(ST1$cluster)){
-  Av_thym <- AddModuleScore(Av_thym, features = list(Kernfeld[[clus]]), ctrl = length(unlist(Kernfeld[[clus]])), name = clus, seed = 42)
-}
-# modulescore averaged at cluster level (and ID split) to check matches from Kernfeld Fig 1
-pheatmap(scale(t(Av_thym@meta.data[,c(6:17)]), center = T),
-         treeheight_row = 0)
+# VlnPlot versions per cluster
+VlnPlot(thymus, features = paste(unique(ST1$cluster),"1",sep = ""),
+        pt.size = 0, ncol = 4)+NoLegend()
 
+#### Kernfeld - T conv - Fig 2 / Sup tab 2 ####
+ST2 <- read.csv("/Volumes/Promise RAID/Line/projects/23_Geuking_thymus_SC/refdata/SupTab2_Kernfeld.csv")
+ST2 <- ST2[ST2$avg_diff>0,] #from 3645 to 1851
+Kernfeld <- list()
+for (clus in unique(ST2$cluster)){
+  Kernfeld[[clus]] <- rownames(thymus@assays$RNA@data)[rownames(thymus@assays$RNA@data) %in% ST2[ST2$cluster==clus,]$gene]
+}
+
+DefaultAssay(thymus) <- 'RNA'
+for (clus in unique(ST2$cluster)){
+  if (length(unlist(Kernfeld[[clus]]))>500){nctrl=500} else {nctrl=length(unlist(Kernfeld[[clus]]))}
+  thymus <- AddModuleScore(thymus, features = list(Kernfeld[[clus]]), ctrl = nctrl, name = clus, seed = 42)
+}
+for (clus in unique(ST2$cluster)){
+  plot1 <- FeaturePlot(thymus, features = paste(clus,"1", sep=""))+
+    scale_colour_gradientn(colours=mycols_b)
+  print(plot1)
+}
+
+# VlnPlot
+VlnPlot(subset(thymus, idents = c("0","1","2","4","5")), 
+        features = paste(unique(ST2$cluster),"1",sep = ""),
+        pt.size = 0, ncol = 3)+NoLegend()
+VlnPlot(subset(thymus, idents = c("0","1","2","4","5")),
+        features = c("Cd3e","Cd3d","Cd4","Cd8a"),
+        pt.size = 0, ncol = 2)
+
+#### Kernfeld - NCL - Fig 3 / Sup tab 4 ####
+ST4 <- read.csv("/Volumes/Promise RAID/Line/projects/23_Geuking_thymus_SC/refdata/SupTab4_Kernfeld.csv")
+ST4 <- ST4[!is.na(ST4$avg_diff),]
+ST4 <- ST4[ST4$avg_diff>0,] #from 2473 to 1620
+Kernfeld <- list()
+for (clus in unique(ST4$cluster)){
+  Kernfeld[[clus]] <- rownames(thymus@assays$RNA@data)[rownames(thymus@assays$RNA@data) %in% ST4[ST4$cluster==clus,]$gene]
+}
+
+DefaultAssay(thymus) <- 'RNA'
+for (clus in unique(ST4$cluster)){
+  if (length(unlist(Kernfeld[[clus]]))>500){nctrl=500} else {nctrl=length(unlist(Kernfeld[[clus]]))}
+  thymus <- AddModuleScore(thymus, features = list(Kernfeld[[clus]]), ctrl = nctrl, name = clus, seed = 42)
+}
+for (clus in unique(ST4$cluster)){
+  plot1 <- FeaturePlot(thymus, features = paste(clus,"1", sep=""))+
+    scale_colour_gradientn(colours=mycols_b)
+  print(plot1)
+}
+
+# VlnPlot
+VlnPlot(subset(thymus, idents = c("3","7","4")), 
+        features = paste(unique(ST4$cluster),"1",sep = ""),
+        pt.size = 0, ncol = 3)+NoLegend()
+
+#TCR g module
+Tcrg <- rownames(thymus@assays$RNA@counts)[startsWith(rownames(thymus@assays$RNA@counts),"Tcrg")]
+thymus <- AddModuleScore(thymus, features = list(Tcrg), ctrl = length(Tcrg), name = "Tcrg", seed = 42)
+VlnPlot(subset(thymus, idents = c("3","7","4")), 
+        features = c("Tcrg1","Cd4","Klrk1","Tbx21","Klrb1c"),
+        pt.size = 0, ncol = 3)+NoLegend()
+
+#### Kernfeld - NCL - Fig 5 / Sup tab 6 ####
+ST6 <- read.csv("/Volumes/Promise RAID/Line/projects/23_Geuking_thymus_SC/refdata/SupTab6_Kernfeld.csv")
+ST6 <- ST6[!is.na(ST6$avg_diff),]
+ST6 <- ST6[ST6$avg_diff>0,]
+Kernfeld <- list()
+for (clus in unique(ST6$cluster)){
+  Kernfeld[[clus]] <- rownames(thymus@assays$RNA@data)[rownames(thymus@assays$RNA@data) %in% ST6[ST6$cluster==clus,]$gene]
+}
+
+DefaultAssay(thymus) <- 'RNA'
+for (clus in unique(ST6$cluster)){
+  if (length(unlist(Kernfeld[[clus]]))>500){nctrl=500} else {nctrl=length(unlist(Kernfeld[[clus]]))}
+  thymus <- AddModuleScore(thymus, features = list(Kernfeld[[clus]]), ctrl = nctrl, name = clus, seed = 42)
+}
+for (clus in unique(ST6$cluster)){
+  plot1 <- FeaturePlot(thymus, features = paste(clus,"1", sep=""))+
+    scale_colour_gradientn(colours=mycols_b)
+  print(plot1)
+}
+
+# VlnPlot
+DefaultAssay(thymus) <- 'RNA'
+pheatmap(thymus@meta.data[thymus@meta.data$res.0.1=="8",paste(unique(ST6$cluster),"1",sep = "")],
+         show_rownames = F)
+FeatureScatter(subset(thymus, idents = "8"),
+               feature1 = "Tnfrsf11a", feature2 = "Fezf2")
+DoHeatmap(subset(thymus, idents = "8"),
+          slot="data",
+          features = c("Tnfrsf11a","Fezf2","Aire",
+                       "Ackr4","Ly75","Cd83","Prss16","Tbata","Psmb11"),
+          draw.lines = F)+
+  scale_fill_gradientn(colours=mycols_b)
+# subset cl 8 - lotting genes from text associated with mTEC vs cTEC
+cl8 <- subset(thymus, idents = "8")
+pheatmap(cl8@assays$RNA@data[
+  c("Tnfrsf11a","Fezf2","Aire","Ackr4","Ly75","Cd83","Prss16","Tbata","Psmb11"),]
+  ,show_colnames = F)
 
 
 #### Checking subsets within cl 6a - dendritic cells ####
@@ -131,7 +223,13 @@ FeatureScatter(subset(thymus, idents = "6a"), feature1 = "H2-Aa",feature2 = "Itg
 FeatureScatter(subset(thymus, idents = "6a"), feature1 = "H2-Aa",feature2 = "Bst2", group.by = "integrated_snn_res.0.9")
 # cl 20 at res.0.9 are pDCs, Itgam+ are cDC2 and H2-Aa+ are cDC1
 
-
-
-
-
+#### Distribution per sample ####
+# meta_col, cell_vec, Seu_obj,splitgroup
+dist_df <- perc_function_samp("res.0.1",colnames(thymus),thymus,"orig.ident")
+ggplot(data=dist_df, aes(x=samp, y=percent, fill=cluster)) +
+  geom_bar(stat= "identity", colour="black")+
+  theme_classic()
+ggplot(data=dist_df, aes(x=samp , y=percent, fill=cluster)) +
+  geom_bar(stat= "identity", colour="black")+
+  facet_grid(.~cluster)+
+  theme_classic()
