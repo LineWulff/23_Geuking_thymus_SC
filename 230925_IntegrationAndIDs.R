@@ -199,7 +199,7 @@ for (clus in unique(ST6$cluster)){
   print(plot1)
 }
 
-# VlnPlot
+# Plotting genes and modules from Kernfeld et al. to ID different TEC populations
 DefaultAssay(thymus) <- 'RNA'
 pheatmap(thymus@meta.data[thymus@meta.data$res.0.1=="8",paste(unique(ST6$cluster),"1",sep = "")],
          show_rownames = F)
@@ -211,12 +211,12 @@ DoHeatmap(subset(thymus, idents = "8"),
                        "Ackr4","Ly75","Cd83","Prss16","Tbata","Psmb11"),
           draw.lines = F)+
   scale_fill_gradientn(colours=mycols_b)
-# subset cl 8 - lotting genes from text associated with mTEC vs cTEC
+
+# subset cl 8 - plotting genes from text associated with mTEC vs cTEC
 cl8 <- subset(thymus, idents = "8")
 pheatmap(cl8@assays$RNA@data[
   c("Tnfrsf11a","Fezf2","Aire","Ackr4","Ly75","Cd83","Prss16","Tbata","Psmb11"),]
   ,show_colnames = F)
-
 
 #### Checking subsets within cl 6a - dendritic cells ####
 FeatureScatter(subset(thymus, idents = "6a"), feature1 = "H2-Aa",feature2 = "Itgam", group.by = "integrated_snn_res.0.9")
@@ -225,6 +225,7 @@ FeatureScatter(subset(thymus, idents = "6a"), feature1 = "H2-Aa",feature2 = "Bst
 
 #### Distribution per sample ####
 # meta_col, cell_vec, Seu_obj,splitgroup
+# run the "Distribution_functions.R" script from useful_scripts on LineWulffs github
 dist_df <- perc_function_samp("res.0.1",colnames(thymus),thymus,"orig.ident")
 ggplot(data=dist_df, aes(x=samp, y=percent, fill=cluster)) +
   geom_bar(stat= "identity", colour="black")+
