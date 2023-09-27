@@ -14,7 +14,7 @@ library(Seurat)
 library(pheatmap)
 
 ###### variables used through script ######
-rm(list=ls())
+#rm(list=ls())
 #date in format year_month_day
 dato <- str_sub(str_replace_all(Sys.Date(),"-","_"), 3, -1)
 # colour string for imputation and overlays
@@ -234,3 +234,7 @@ ggplot(data=dist_df, aes(x=samp , y=percent, fill=cluster)) +
   geom_bar(stat= "identity", colour="black")+
   facet_grid(.~cluster)+
   theme_classic()
+
+
+#### save object ####
+#saveRDS(thymus, file = "2309_R1_Geuking_ThymusSC.rds")
