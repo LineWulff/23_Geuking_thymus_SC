@@ -14,7 +14,7 @@ library(Seurat)
 library(pheatmap)
 
 ###### variables used through script ######
-#rm(list=ls())
+rm(list=ls())
 #date in format year_month_day
 dato <- str_sub(str_replace_all(Sys.Date(),"-","_"), 3, -1)
 # colour string for imputation and overlays
@@ -27,10 +27,11 @@ data_dir <- "/Volumes/Promise RAID/Line/projects/23_Geuking_thymus_SC"
 ##### Read in samples and integrate based on rpca #####
 s6 <- readRDS(paste(data_dir,"s6","s6.rds", sep="/"))
 s7 <- readRDS(paste(data_dir,"s7","s7.rds", sep="/"))
+s8 <- readRDS(paste(data_dir,"s8","s8.rds", sep="/"))
 
 # select features that are repeatedly variable across datasets for integration run PCA on each
 # dataset using these features
-samp_list <- c(s6,s7)
+samp_list <- c(s6,s7,s8)
 features <- SelectIntegrationFeatures(object.list = samp_list)
 samp_list <- lapply(X = samp_list, FUN = function(x) {
   x <- ScaleData(x, features = features, verbose = TRUE, 
@@ -51,8 +52,8 @@ thymus <- ScaleData(thymus, verbose = TRUE,
 thymus <- RunPCA(thymus, npcs = 30, verbose = FALSE)
 ElbowPlot(thymus)
 
-thymus <- RunUMAP(thymus, reduction = "pca", dims = 1:17)
-thymus <- FindNeighbors(thymus, reduction = "pca", dims = 1:17)
+thymus <- RunUMAP(thymus, reduction = "pca", dims = 1:15)
+thymus <- FindNeighbors(thymus, reduction = "pca", dims = 1:15)
 res <- seq(0,5,0.1)
 thymus <- FindClusters(thymus, resolution = res)
 
@@ -65,26 +66,16 @@ DimPlot(thymus, group.by = "integrated_snn_res.1")
 P1 <- FeaturePlot(thymus, features = c("percent.mt"))+scale_color_viridis_c(); P2 <- FeaturePlot(thymus, features = c("nFeature_RNA"))+scale_color_viridis_c()
 P1+P2
 
+Idents(thymus) <- 'integrated_snn_res.0.2'
 # Aire expression limited to few cells in cl. 8
 FeaturePlot(thymus, features = "Aire", order=T)+scale_color_gradientn(colours=mycols_b)
 
 # Myeloid cells or B cells?
 FeaturePlot(thymus, features = "Itgax", order=T)+scale_color_gradientn(colours=mycols_b)
 FeaturePlot(thymus, features = "Cd79a", order=T)+scale_color_gradientn(colours=mycols_b)
-VlnPlot(thymus, features = c("Cd79a","Itgax"), pt.size = 0)
-
-# Split cl. 6 into res.0.2 and rename cells (2 clusters, 6a and 6b)
-# check cluster 6 only splits to two clusters
-unique(thymus@meta.data[thymus@meta.data$integrated_snn_res.0.1==6,]$integrated_snn_res.0.2)
-# make new res0.1
-thymus@meta.data$res.0.1 <- as.character(thymus@meta.data$integrated_snn_res.0.1)
-thymus@meta.data[thymus@meta.data$integrated_snn_res.0.2==9,]$res.0.1 <- "6a"
-thymus@meta.data[thymus@meta.data$integrated_snn_res.0.2==10,]$res.0.1 <- "6b"
-thymus@meta.data$res.0.1 <- factor(thymus@meta.data$res.0.1, levels = c("0","1","2","3","4","5","6a","6b","7","8"))
-DimPlot(thymus, group.by = "res.0.1", label = T, label.size = 6)+NoLegend()
+VlnPlot(thymus, features = c("Cd79a","Itgax","Aire"), pt.size = 0)
 
 #### Identifying DEGs ####
-Idents(thymus) <- 'res.0.1'
 DefaultAssay(thymus) <- 'RNA'
 Tot_DEGs <- FindAllMarkers(thymus, only.pos = T, logfc.threshold = 0.5)
 write.csv(Tot_DEGs, file = paste(dato,"R1_thymus_DEGs_res.0.1.csv"))
