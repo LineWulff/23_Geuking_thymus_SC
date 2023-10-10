@@ -239,10 +239,6 @@ pheatmap(cl11@assays$RNA@data[TECgenes,],
          show_colnames = T, show_rownames = F,
          cluster_rows = F)
 
-
-
-
-
 #### Checking subsets within cl 6a - dendritic cells ####
 FeatureScatter(subset(thymus, idents = "9"), feature1 = "H2-Aa",feature2 = "Itgam", group.by = "integrated_snn_res.0.9")
 FeatureScatter(subset(thymus, idents = "9"), feature1 = "H2-Aa",feature2 = "Bst2", group.by = "integrated_snn_res.0.9")
@@ -262,4 +258,4 @@ ggplot(data=dist_df, aes(x=samp , y=percent, fill=cluster)) +
 
 
 #### save object ####
-#saveRDS(thymus, file = "2309_R1_Geuking_ThymusSC.rds")
+saveRDS(thymus, file = "2309_Geuking_ThymusSC_allcond.rds")
