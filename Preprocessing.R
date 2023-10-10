@@ -23,7 +23,7 @@ dato <- str_sub(str_replace_all(Sys.Date(),"-","_"), 3, -1)
 # colour string for imputation and overlays
 mycols_b <- c("#bdbdbd","#d9d9d9","#FDDBC7","#F4A582","#D6604D","#B2182B","#67001F")
 # project
-project <- "s7"
+project <- "s8"
 proj_dir <- "/Users/linewulff/Documents/work/projects/23_Geuking_thymus_SC"
 data_dir <- "/Volumes/Promise\ RAID/Markus/Kirsty_scRNA_May2023"
 
@@ -64,9 +64,9 @@ setwd(paste(proj_dir,project,"QC",sep="/"))
 # nFeature = number of genes per barcode
 # nCount = number of reads per barcode = count depth
 
-#png(paste(dato,project,"QC_measures1.png",sep="_"),width = 1200, height = 1000, res = 150)
+png(paste(dato,project,"QC_measures1.png",sep="_"),width = 1200, height = 1000, res = 150)
 VlnPlot(pat_data, features = c("nFeature_RNA", "nCount_RNA", "percent.mt"), pt.size = 0.1)
-#dev.off()
+dev.off()
 
 pat_data_QC <- as.data.frame(pat_data@meta.data)
 pat_data_QC <- pat_data_QC[order(pat_data_QC$nCount_RNA),]
@@ -88,7 +88,7 @@ dev.off()
 ## Number of genes
 png(paste(dato,project,"QC_NumberGeneshHisto_1.png",sep = "_"),height = 800, width = 1000, res =150)
 ggplot(pat_data_QC, aes(x=nFeature_RNA))+geom_histogram(fill="grey",bins = 100)+
-  xlab("Number of genes")+ggtitle(paste(project,"_ILF",sep=""))+geom_vline(xintercept = c(1200,5500), colour = "red")
+  xlab("Number of genes")+ggtitle(paste(project,"_ILF",sep=""))+geom_vline(xintercept = c(800,4000), colour = "red")
 dev.off()
 
 png(paste(dato,project,"QC_NumberGeneshHisto_2.png",sep = "_"),height = 800, width = 1000, res =150)
@@ -105,14 +105,14 @@ dev.off()
 png(paste(dato,project,"QC_CountDepth_GeneCount_1.png",sep = "_"),height = 800, width = 1000, res =150)
 ggplot(pat_data_QC, aes(x=nCount_RNA, y=nFeature_RNA, colour=percent.mt))+geom_point()+
   scale_colour_viridis()+xlab("Count Depth")+ylab("Number of genes")+ggtitle(paste(project,sep=""))+
-  geom_vline(xintercept = c(2500,25000), colour = "red")+geom_hline(yintercept = c(1200,5500),colour="red")
+  geom_vline(xintercept = c(2500,25000), colour = "red")+geom_hline(yintercept = c(800,4000),colour="red")
 dev.off()
 
 # crazy high MT? plot this one too
 png(paste(dato,project,"QC_CountDepth_GeneCount_1.png",sep = "_"),height = 800, width = 1000, res =150)
 ggplot(pat_data_QC, aes(x=percent.mt, y=nFeature_RNA, colour=percent.mt))+geom_point()+
      scale_colour_viridis()+ylab("Number of genes")+ggtitle(paste(project,sep=""))+
-  geom_hline(yintercept = c(1200,5500),colour="red")+
+  geom_hline(yintercept = c(800,4000),colour="red")+
   geom_vline(xintercept = c(20),colour="red")
 dev.off()
 
@@ -126,8 +126,8 @@ dev.off()
 MTthres <- 20
 CountLow <- NA #include in subsetting if necessary
 CountHigh <- NA #include in subsetting if necessary
-FeatLow <- 1200
-FeatHigh <- 5500
+FeatLow <- 800
+FeatHigh <- 4000
 
 # save some numbers on orig. sample
 Pre_ncells <- length(colnames(pat_data))
