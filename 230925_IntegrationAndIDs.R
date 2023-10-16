@@ -194,8 +194,7 @@ for (clus in unique(ST6$cluster)){
 for (clus in unique(ST6$cluster)){
   plot1 <- FeaturePlot(thymus, features = paste(clus,"1", sep=""))+
     scale_colour_gradientn(colours=mycols_b)
-  print(plot1)
-}
+  print(plot1)}
 
 # Plotting genes and modules from Kernfeld et al. to ID different TEC populations
 DefaultAssay(thymus) <- 'RNA'
@@ -239,9 +238,46 @@ pheatmap(cl11@assays$RNA@data[TECgenes,],
          cluster_rows = F)
 
 #### Checking subsets within cl 6a - dendritic cells ####
+Idents(thymus) <- 'integrated_snn_res.0.2'
 FeatureScatter(subset(thymus, idents = "9"), feature1 = "H2-Aa",feature2 = "Itgam", group.by = "integrated_snn_res.0.9")
 FeatureScatter(subset(thymus, idents = "9"), feature1 = "H2-Aa",feature2 = "Bst2", group.by = "integrated_snn_res.0.9")
 # cl 20 at res.0.9 are pDCs, Itgam+ are cDC2 and H2-Aa+ are cDC1
+Idents(thymus) <- 'integrated_snn_res.0.9'
+DCs <- subset(thymus, idents = "18")
+DCs <- cbind(DCs@meta.data, t(as.matrix(DCs@assays$RNA@data[c("H2-Aa","H2-Ab1","Itgam","Itgax","Irf4","Irf8","Bst2","Batf3","Clec9a","Sirpa","Xcr1"),])))
+
+ggplot(DCs, aes(x = `H2-Aa`, y = Itgam, colour = `H2-Ab1`))+
+  geom_point()+
+  scale_color_viridis_c(option = "plasma")+
+  geom_vline(xintercept = 2.5)+
+  geom_segment(aes(x=0, xend = 2.5, y = 0.2, yend = 0.2),colour="black")+
+  facet_wrap(~colonization, ncol = 2)+
+  theme_classic()
+
+ggplot(DCs, aes(x = `H2-Aa`, y = Itgam, colour = Sirpa))+
+  geom_point()+
+  scale_color_viridis_c(option = "plasma")+
+  geom_vline(xintercept = 2.5)+
+  geom_segment(aes(x=0, xend = 2.5, y = 0.2, yend = 0.2),colour="black")+
+  facet_wrap(~colonization, ncol = 2)+
+  theme_classic()
+
+DC_ID <- function(x) {
+  ifelse(DCs[x,"H2-Aa"] > 2.5 , "cDC1", ifelse(DCs[x,"Itgam"] > 0.2, "cDC2", "unkown_DC"))}
+DCs$ID <- DC_ID(rownames(DCs))
+
+ggplot(DCs, aes(x = `H2-Aa`, y = Itgam, colour = ID))+
+  geom_point()+
+  geom_vline(xintercept = 2.5)+
+  geom_segment(aes(x=0, xend = 2.5, y = 0.2, yend = 0.2),colour="black")+
+  facet_wrap(~colonization, ncol = 2)+
+  theme_classic()
+
+Idents(thymus) <- 'integrated_snn_res.0.2'
+
+thymus@meta.data$res.0.2 <- as.character(thymus@meta.data$integrated_snn_res.0.2)
+thymus@meta.data[rownames(DCs),]$res.0.2 <- DCs$ID
+thymus@meta.data[thymus@meta.data$integrated_snn_res.0.9==20,]$res.0.2 <- "pDC"
 
 #### Distribution per sample ####
 # meta_col, cell_vec, Seu_obj,splitgroup
