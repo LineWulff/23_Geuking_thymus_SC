@@ -20,7 +20,6 @@ dato <- str_sub(str_replace_all(Sys.Date(),"-","_"), 3, -1)
 # colour string for imputation and overlays
 mycols_b <- c("blue","#bdbdbd","#d9d9d9","#FDDBC7","#F4A582","#D6604D","#B2182B","#67001F")
 # project
-project <- "s7"
 proj_dir <- "/Users/linewulff/Documents/work/projects/23_Geuking_thymus_SC"
 data_dir <- "/Volumes/Promise RAID/Line/projects/23_Geuking_thymus_SC"
 # sample information
