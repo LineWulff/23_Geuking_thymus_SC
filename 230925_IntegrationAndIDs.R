@@ -282,14 +282,15 @@ thymus@meta.data[thymus@meta.data$integrated_snn_res.0.9==20,]$res.0.2 <- "pDC"
 #### Distribution per sample ####
 # meta_col, cell_vec, Seu_obj,splitgroup
 # run the "Distribution_functions.R" script from useful_scripts on LineWulffs github
-dist_df <- perc_function_samp("integrated_snn_res.0.2",colnames(thymus),thymus,"orig.ident")
+dist_df <- perc_function_samp("integrated_snn_res.0.2",colnames(thymus),thymus,"colonization")
 ggplot(data=dist_df, aes(x=samp, y=percent, fill=cluster)) +
   geom_bar(stat= "identity", colour="black")+
   theme_classic()
 ggplot(data=dist_df, aes(x=samp , y=percent, fill=cluster)) +
   geom_bar(stat= "identity", colour="black")+
   facet_grid(.~cluster)+
-  theme_classic()
+  theme_classic()+
+  theme(axis.text.x = element_text(angle = 90))
 
 
 #### save object ####
