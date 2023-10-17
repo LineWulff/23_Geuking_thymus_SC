@@ -75,7 +75,7 @@ for (clus in unique(thymus@meta.data$res.0.2)){
     geom_point()+
     geom_hline(yintercept = -log10(0.05), linetype = "dashed")+ #sign.
     geom_vline(xintercept = c(-0.25,0.25), linetype = "dashed")+ #sign.
-    geom_text_repel(data = top_10,aes(x = avg_log2FC, y = -log10(p_val_adj)), label = top_10$gene, colour="black")+
+    geom_text_repel(data = top_10,aes(x = avg_log2FC, y = -log10(p_val_adj)), label = top_10$gene, colour="black", max.overlaps = Inf)+
     scale_colour_manual(values = volc_cols)+
     theme_classic()
   pdf(paste(dato,"volcano",clus,"sdmdmm2vsGF_logFC0.25padj0.05.pdf", sep = "_"), height = 4, width = 5.5)
@@ -103,17 +103,17 @@ for (clus in unique(thymus@meta.data$res.0.2)){
   sign <- DEGs[DEGs$DEG!="NA",]
   # top ten markers by avg logFC - if available
   if (length(unique(DEGs$DEG))>1){
-    if (nrow(sign[sign$DEG=="sdmdmm2",])>=10 & nrow(sign[sign$DEG=="gf",])>=10){
+    if (nrow(sign[sign$DEG=="spf",])>=10 & nrow(sign[sign$DEG=="gf",])>=10){
       top_10 <- sign[order(sign$avg_log2FC, decreasing = T),][c(1:10,(dim(sign)[1]-9):dim(sign)[1]),]
-    } else if (nrow(sign[sign$DEG=="sdmdmm2",])<10 & nrow(sign[sign$DEG=="gf",])>=10){
-      top_10 <- sign[sign$DEG=="sdmdmm2",]
+    } else if (nrow(sign[sign$DEG=="spf",])<10 & nrow(sign[sign$DEG=="gf",])>=10){
+      top_10 <- sign[sign$DEG=="spf",]
       top_10 <- top_10 %>% rbind(sign[order(sign$avg_log2FC, decreasing = T),][c((dim(sign)[1]-9):dim(sign)[1]),])
-    } else if (nrow(sign[sign$DEG=="sdmdmm2",])>=10 & nrow(sign[sign$DEG=="gf",])<10){
+    } else if (nrow(sign[sign$DEG=="spf",])>=10 & nrow(sign[sign$DEG=="gf",])<10){
       top_10 <- sign[sign$DEG=="gf",]
       top_10 <- top_10 %>% rbind(sign[order(sign$avg_log2FC, decreasing = T),][c(1:10),])
     } else {
       top_10 <- sign[sign$DEG=="gf",]
-      top_10 <- top_10 %>% rbind(sign[sign$DEG=="sdmdmm2",])
+      top_10 <- top_10 %>% rbind(sign[sign$DEG=="spf",])
     }} else {top_10 <- DEGs[DEGs$DEG!="NA",]}
   
   # plot volcano plot w. top 10 DEGs
@@ -121,7 +121,7 @@ for (clus in unique(thymus@meta.data$res.0.2)){
     geom_point()+
     geom_hline(yintercept = -log10(0.05), linetype = "dashed")+ #sign.
     geom_vline(xintercept = c(-0.25,0.25), linetype = "dashed")+ #sign.
-    geom_text_repel(data = top_10,aes(x = avg_log2FC, y = -log10(p_val_adj)), label = top_10$gene, colour="black")+
+    geom_text_repel(data = top_10,aes(x = avg_log2FC, y = -log10(p_val_adj)), label = top_10$gene, colour="black", max.overlaps = Inf)+
     scale_colour_manual(values = volc_cols)+
     theme_classic()
   pdf(paste(dato,"volcano",clus,"spfvsGF_logFC0.25padj0.05.pdf", sep = "_"), height = 4, width = 5.5)
@@ -149,16 +149,16 @@ for (clus in unique(thymus@meta.data$res.0.2)){
   sign <- DEGs[DEGs$DEG!="NA",]
   # top ten markers by avg logFC - if available
   if (length(unique(DEGs$DEG))>1){
-    if (nrow(sign[sign$DEG=="sdmdmm2",])>=10 & nrow(sign[sign$DEG=="gf",])>=10){
+    if (nrow(sign[sign$DEG=="sdmdmm2",])>=10 & nrow(sign[sign$DEG=="spf",])>=10){
       top_10 <- sign[order(sign$avg_log2FC, decreasing = T),][c(1:10,(dim(sign)[1]-9):dim(sign)[1]),]
-    } else if (nrow(sign[sign$DEG=="sdmdmm2",])<10 & nrow(sign[sign$DEG=="gf",])>=10){
+    } else if (nrow(sign[sign$DEG=="sdmdmm2",])<10 & nrow(sign[sign$DEG=="spf",])>=10){
       top_10 <- sign[sign$DEG=="sdmdmm2",]
       top_10 <- top_10 %>% rbind(sign[order(sign$avg_log2FC, decreasing = T),][c((dim(sign)[1]-9):dim(sign)[1]),])
-    } else if (nrow(sign[sign$DEG=="sdmdmm2",])>=10 & nrow(sign[sign$DEG=="gf",])<10){
-      top_10 <- sign[sign$DEG=="gf",]
+    } else if (nrow(sign[sign$DEG=="sdmdmm2",])>=10 & nrow(sign[sign$DEG=="spf",])<10){
+      top_10 <- sign[sign$DEG=="spf",]
       top_10 <- top_10 %>% rbind(sign[order(sign$avg_log2FC, decreasing = T),][c(1:10),])
     } else {
-      top_10 <- sign[sign$DEG=="gf",]
+      top_10 <- sign[sign$DEG=="spf",]
       top_10 <- top_10 %>% rbind(sign[sign$DEG=="sdmdmm2",])
     }} else {top_10 <- DEGs[DEGs$DEG!="NA",]}
   
@@ -167,7 +167,7 @@ for (clus in unique(thymus@meta.data$res.0.2)){
     geom_point()+
     geom_hline(yintercept = -log10(0.05), linetype = "dashed")+ #sign.
     geom_vline(xintercept = c(-0.25,0.25), linetype = "dashed")+ #sign.
-    geom_text_repel(data = top_10,aes(x = avg_log2FC, y = -log10(p_val_adj)), label = top_10$gene, colour="black")+
+    geom_text_repel(data = top_10,aes(x = avg_log2FC, y = -log10(p_val_adj)), label = top_10$gene, colour="black", max.overlaps = Inf)+
     scale_colour_manual(values = volc_cols)+
     theme_classic()
   pdf(paste(dato,"volcano",clus,"sdmdmm2vsSpf_logFC0.25padj0.05.pdf", sep = "_"), height = 4, width = 5.5)
